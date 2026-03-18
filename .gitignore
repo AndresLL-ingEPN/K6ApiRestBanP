@@ -1,0 +1,7 @@
+junit.xml
+xrayJunit.xml
+summary.json
+summary.html
+test*.json
+resultado_k6.json
+reports/
