@@ -1,0 +1,101 @@
+ANALISIS DE RESULTADOS - PRUEBA DE RENDIMIENTO
+Endpoint evaluado: POST /auth/login
+Fecha de analisis: 18/03/2026
+Elaborado por: Andres Llumiquinga
+
+
+1. RESUMEN EJECUTIVO
+
+Se ejecuto una prueba de carga sobre el endpoint /auth/login con un perfil de hasta 20 req/s usando k6.
+
+El sistema respondio de forma estable durante la ejecucion observada, sin errores HTTP ni fallas funcionales en las validaciones implementadas. El tiempo de respuesta se mantuvo consistente, con p95 de 334.66 ms, claramente por debajo del umbral definido de 1500 ms.
+
+No se identifican cuellos de botella bajo la carga aplicada. Sin embargo, esta ejecucion no llevo al servicio a un punto de saturacion, por lo que no permite concluir cual es su limite real de capacidad ni su comportamiento bajo estres sostenido.
+
+
+2. OBJETIVO Y ALCANCE DE LA PRUEBA
+
+Objetivo:
+Validar el comportamiento del endpoint de autenticacion bajo una carga controlada y verificar cumplimiento de tiempos de respuesta y tasa de error.
+
+Alcance cubierto:
+- Endpoint: POST https://fakestoreapi.com/auth/login
+- Escenario: ramping-arrival-rate
+- Perfil de carga: rampa hasta 20 req/s, sostenimiento por 60 s y descenso controlado
+- Dataset: 4 usuarios leidos desde archivo CSV
+- Validaciones funcionales: codigo HTTP exitoso y presencia de token en la respuesta
+
+Fuera de alcance:
+- Determinacion del punto de quiebre del servicio
+- Comportamiento del sistema en pruebas de estres o larga duracion
+- Certificacion de capacidad productiva, debido a que el objetivo evaluado es una API publica externa
+
+
+3. RESULTADOS RELEVANTES
+
+Metricas principales observadas:
+
+- Solicitudes ejecutadas: 1695
+- Errores HTTP: 0.00%
+- Checks funcionales: 100.00% (3390/3390)
+- Tiempo medio de respuesta: 312.94 ms
+- Tiempo de respuesta p90: 326.77 ms
+- Tiempo de respuesta p95: 334.66 ms
+- Tiempo maximo observado: 527.56 ms
+- Iteraciones descartadas: 4
+- VUs maximos utilizados: 53
+
+Lectura de resultado:
+
+- El endpoint cumple holgadamente los thresholds definidos.
+- No hay evidencia de degradacion funcional bajo el volumen aplicado.
+- La distribucion de latencia es estable; la diferencia entre mediana y p95 es baja, lo que descarta variabilidad relevante en esta corrida.
+- El tiempo dominante esta en http_req_waiting (~311 ms), por lo que la mayor parte de la latencia proviene del procesamiento del servicio y no de red o transferencia.
+
+
+4. EVALUACION
+
+Desde el punto de vista de calidad de rendimiento, la evidencia disponible permite afirmar que el endpoint se comporta correctamente para el nivel de carga probado. La corrida es limpia: no hay errores, no hay dispersion importante en tiempos y no hay sintomas de inestabilidad durante la ventana evaluada.
+
+El dato mas importante no es solo que el p95 haya sido bueno, sino que la prueba no exigio al sistema cerca de un limite. Por eso, el resultado sirve para confirmar estabilidad en carga baja o media, pero no para afirmar escalabilidad ni capacidad maxima.
+
+Las 4 dropped iterations no cambian la conclusion del ejercicio. Son marginales frente al volumen total ejecutado y no muestran un problema del servicio. Se interpretan como un ajuste fino del executor o del pool de VUs, no como una degradacion del endpoint.
+
+
+5. RIESGOS Y LIMITACIONES DEL ANALISIS
+
+- La prueba se realizo contra un servicio publico externo. Por ello, parte de la latencia puede estar influenciada por red, disponibilidad o comportamiento ajeno al entorno del proyecto.
+- El escenario llego a 20 req/s, carga insuficiente para identificar saturacion, degradacion progresiva o punto de quiebre.
+- El dataset usado es reducido. Con solo 4 usuarios, no se descarta algun efecto de cache o comportamiento repetitivo del servicio.
+- La duracion de la prueba no permite evaluar fugas de recursos, degradacion por tiempo ni estabilidad prolongada.
+
+
+6. CONCLUSION
+
+La prueba de carga sobre POST /auth/login es satisfactoria para el escenario ejecutado.
+
+Con la evidencia obtenida, el endpoint muestra estabilidad operativa hasta 20 req/s, sin errores y con tiempos de respuesta consistentes muy por debajo del umbral acordado. No se observan hallazgos que bloqueen su aprobacion en este alcance.
+
+La conclusion debe leerse con su limite correcto: el sistema paso una prueba de carga controlada, pero aun no esta caracterizado su limite de capacidad. Si el objetivo del analisis es soportar decisiones de escalabilidad o dimensionamiento, se requiere una prueba de estres y otra de durabilidad.
+
+
+7. RECOMENDACIONES
+
+1. Ejecutar una prueba de estres con incrementos progresivos por encima de 20 req/s hasta identificar el punto donde suba el p95 o aparezcan errores.
+2. Ejecutar una prueba de soak con la carga objetivo durante al menos 30 a 60 minutos para validar estabilidad sostenida.
+3. Ampliar el dataset de usuarios para reducir sesgo por repeticion y mejorar representatividad.
+4. Si se busca eliminar dropped iterations en futuras corridas, ajustar preAllocatedVUs por encima del valor actual.
+5. Mantener como mensaje ejecutivo del informe que el endpoint es estable bajo la carga probada, pero que la capacidad maxima aun no fue demostrada.
+
+
+8. VEREDICTO
+
+Resultado del escenario evaluado: APROBADO
+
+Criterios cumplidos:
+- p95 < 1500 ms: Cumplido
+- tasa de error < 3%: Cumplido
+- checks funcionales esperados: Cumplidos
+
+Decision recomendada:
+El endpoint puede considerarse aceptable para la carga validada en esta ejecucion. No corresponde usar este resultado, por si solo, como evidencia de capacidad maxima o escalabilidad en produccion.
