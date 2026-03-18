@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<testsuites tests="2" failures="0">
+<testsuite name="k6  thresholds" tests="2" failures="0"><testcase name="undefined undefined http_req_failed - rate&lt;0.03"><system-out><![CDATA[Value registered for http_req_failed is within the expected values(rate<0.03). Actual values: http_req_failed = 0.00%]]></system-out><properties><property name="testrun_comment"><![CDATA[Value registered for http_req_failed is within the expected values- rate<0.03. Actual value: 0.00%]]></property><property name="test_description"><![CDATA[Threshold for http_req_failed]]></property><property name="test_summary" value="undefined undefined http_req_failed - rate&lt;0.03"/></properties></testcase>
+<testcase name="undefined undefined http_req_duration - p(95)&lt;1500"><system-out><![CDATA[Value registered for http_req_duration is within the expected values(p(95)<1500). Actual values: http_req_duration = 333.52ms]]></system-out><properties><property name="testrun_comment"><![CDATA[Value registered for http_req_duration is within the expected values- p(95)<1500. Actual value: 333.52ms]]></property><property name="test_description"><![CDATA[Threshold for http_req_duration]]></property><property name="test_summary" value="undefined undefined http_req_duration - p(95)&lt;1500"/></properties></testcase>
+</testsuite >
+</testsuites >
